@@ -1,5 +1,6 @@
-from PySide6.QtGui import QPixmap, QPainter, QColor, QPen
+from PySide6.QtGui import QPixmap, QPainter, QPen
 from PySide6.QtCore import Qt, QPointF
+from PySide6.QtGui import QImage, QColor
 
 class LayerManager:
     def __init__(self, viewer):
@@ -30,12 +31,13 @@ class LayerManager:
         self.update_display()
         painter.end()
 
-    def draw_points(self, name, points, color=Qt.red, radius=20):
-        #print("NOME del LAYER", name)
+    def draw_points(self, name, points, color=Qt.red):
+        
+        points = [QPointF(pt[0], pt[1]) if isinstance(pt, tuple) else pt for pt in points]
+        print(points)
         """Disegna una lista di QPointF su un layer"""
-        print("name", name)
         zoom_factor = self.viewer.pixmap.width() / self.viewer.view_rect.width()
-        radius = int(radius / zoom_factor) 
+        radius = int(10 / zoom_factor) 
 
         if name not in self.layers:
             self.create_layer(name)
@@ -50,7 +52,7 @@ class LayerManager:
         self.update_display()
         
 
-    def draw_lines(self, name, points, color=Qt.blue):
+    def draw_lines(self, name, points, color):
         """Disegna una lista di coppie di punti [(p1, p2), ...] su un layer"""
         #print("NOME del LAYER", name)
         if name not in self.layers:
@@ -59,11 +61,13 @@ class LayerManager:
         painter.setPen(QPen(color, 6))
         print("POINTS",points)
         segmenti = list(zip(points[:-1], points[1:]))
-        #print("SEGMENTI",segmenti)
+        print("SEGMENTI",segmenti)
         for p1, p2 in segmenti:
-            p1x, p1y = p1
-            p2x, p2y = p2
-            painter.drawLine(QPointF(p1x,p1y), QPointF(p2x,p2y))
+            if isinstance(p1, tuple):
+                p1 = QPointF(p1[0], p1[1])
+            if isinstance(p2, tuple):
+                p2 = QPointF(p2[0], p2[1])
+            painter.drawLine(p1, p2)
         painter.end()
         self.update_display()
 
@@ -93,7 +97,7 @@ class LayerManager:
 
         # Calcola il raggio adattato allo zoom
         zoom_factor = self.viewer.scaled_pixmap.width() / self.viewer.view_rect.width()
-        radius = int(10 / zoom_factor)
+        radius = int(5 / zoom_factor)
 
         # Loop su tutti i layer visibili
         for name, layer in self.layers.items():
