@@ -1,12 +1,13 @@
 from PySide6.QtGui import QPixmap, QPainter, QPen
 from PySide6.QtCore import Qt, QPointF
-from PySide6.QtGui import QImage, QColor
+from PySide6.QtGui import QColor
+
 
 class LayerManager:
     def __init__(self, viewer):
         self.viewer = viewer  # riferimento all'ImageViewer principale
-        self.layers = {}      # dizionario: nome_layer -> QPixmap
-        self.visible = {}     # dizionario: nome_layer -> bool
+        self.layers = {}  # dizionario: nome_layer -> QPixmap
+        self.visible = {}  # dizionario: nome_layer -> bool
 
     def create_layer(self, name):
         """Crea un layer trasparente con lo stesso size dell'immagine attuale"""
@@ -17,10 +18,10 @@ class LayerManager:
         pixmap.fill(Qt.transparent)
         self.layers[name] = pixmap
         self.visible[name] = True
-    
+
     def draw_rect(self, name, rect, color=QColor(0, 255, 0, 180), fill=QColor(0, 255, 0, 60)):
-        #print("RECT", rect)
-        #print("Layers",self.layers[name])
+        # print("RECT", rect)
+        # print("Layers",self.layers[name])
         if name not in self.layers:
             self.create_layer(name)
             self.visible[name] = True
@@ -32,17 +33,16 @@ class LayerManager:
         painter.end()
 
     def draw_points(self, name, points, color=Qt.red):
-        
         points = [QPointF(pt[0], pt[1]) if isinstance(pt, tuple) else pt for pt in points]
         print(points)
         """Disegna una lista di QPointF su un layer"""
         zoom_factor = self.viewer.pixmap.width() / self.viewer.view_rect.width()
-        radius = int(10 / zoom_factor) 
+        radius = int(10 / zoom_factor)
 
         if name not in self.layers:
             self.create_layer(name)
             print("ho creato il layer: ", name)
-        
+
         painter = QPainter(self.layers[name])
         painter.setPen(color)
         painter.setBrush(color)
@@ -50,18 +50,17 @@ class LayerManager:
             painter.drawEllipse(pt, radius, radius)
         painter.end()
         self.update_display()
-        
 
     def draw_lines(self, name, points, color):
         """Disegna una lista di coppie di punti [(p1, p2), ...] su un layer"""
-        #print("NOME del LAYER", name)
+        # print("NOME del LAYER", name)
         if name not in self.layers:
             self.create_layer(name)
         painter = QPainter(self.layers[name])
         painter.setPen(QPen(color, 6))
-        print("POINTS",points)
+        print("POINTS", points)
         segmenti = list(zip(points[:-1], points[1:]))
-        print("SEGMENTI",segmenti)
+        print("SEGMENTI", segmenti)
         for p1, p2 in segmenti:
             if isinstance(p1, tuple):
                 p1 = QPointF(p1[0], p1[1])
@@ -125,10 +124,7 @@ class LayerManager:
 
         # Ritaglia la porzione visibile e scala
         cropped = composed.copy(self.viewer.view_rect)
-        scaled = cropped.scaled(
-            self.viewer.scroll_area.viewport().size(),
-            Qt.KeepAspectRatio, Qt.SmoothTransformation
-        )
+        scaled = cropped.scaled(self.viewer.scroll_area.viewport().size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
         self.viewer.scaled_pixmap = scaled
         self.viewer.image.setPixmap(scaled)
 
@@ -136,7 +132,7 @@ class LayerManager:
         """Esporta il layer come immagine (PNG, ecc.)"""
         if name in self.layers:
             self.layers[name].save(path)
-    
+
     def clear_all_layers(self):
         """Cancella tutti i layer e aggiorna la visualizzazione"""
         print("[LayerManager] clear_all_layers() chiamato")

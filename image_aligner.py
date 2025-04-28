@@ -1,6 +1,6 @@
-from PySide6.QtWidgets import QMessageBox, QInputDialog
+from PySide6.QtWidgets import QMessageBox
 from PySide6.QtGui import QTransform, QColor, Qt
-from PySide6.QtCore import QPoint, QRect
+from PySide6.QtCore import QRect
 import math
 
 
@@ -71,5 +71,5 @@ class ImageAligner:
         # self.set_view_rect(corrected_rect)
         self.viewer.layer_manager.update_display()
 
-        QMessageBox.information(self.viewer, "Trasformazione completata", f"L'immagine è stata centrata sull'origine e ruotata.")
+        QMessageBox.information(self.viewer, "Trasformazione completata", "L'immagine è stata centrata sull'origine e ruotata.")
         self.viewer.layer_manager.clear_layer("axis_definition")
