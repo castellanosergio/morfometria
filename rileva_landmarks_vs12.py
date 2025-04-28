@@ -1,9 +1,24 @@
 import sys
 import os
 from PySide6.QtWidgets import (
-    QApplication, QWidget, QLabel, QComboBox, QHBoxLayout, QComboBox, QLineEdit,
-    QPushButton, QMessageBox, QGridLayout, QSpacerItem, QSizePolicy, QFileDialog,
-    QScrollArea, QMainWindow, QMenuBar, QMenu, QInputDialog
+    QApplication,
+    QWidget,
+    QLabel,
+    QComboBox,
+    QHBoxLayout,
+    QComboBox,
+    QLineEdit,
+    QPushButton,
+    QMessageBox,
+    QGridLayout,
+    QSpacerItem,
+    QSizePolicy,
+    QFileDialog,
+    QScrollArea,
+    QMainWindow,
+    QMenuBar,
+    QMenu,
+    QInputDialog,
 )
 from PySide6.QtGui import QAction, QPixmap, QPainter, QColor, QMouseEvent, QTransform, QCursor
 from PySide6.QtGui import QMouseEvent, QPainter, QColor, QPixmap
@@ -25,17 +40,15 @@ from plugin_calibrazione import CalibrationPlugin
 from plugin_gestione_layers import LayerPlugin
 
 
-
-
 __version__ = "2025.0"
 IMAGE_EXTENSION = "jpg"
+
 
 class ClickableLabel(QLabel):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.viewer = parent
         self.setFocusPolicy(Qt.StrongFocus)
-
 
     def enterEvent(self, event):
         if self.viewer.inserisci_landmarks.active or self.viewer.spezzata_curva.active or self.viewer.calibrazione.active:
@@ -45,10 +58,8 @@ class ClickableLabel(QLabel):
             self.setCursor(Qt.ArrowCursor)
             QApplication.setOverrideCursor(Qt.ArrowCursor)
 
-    
     def leaveEvent(self, event):
         self.setCursor(Qt.ArrowCursor)
-
 
     def mousePressEvent(self, event):
         if self.viewer.calibrazione.active:
@@ -64,7 +75,7 @@ class ClickableLabel(QLabel):
         elif self.viewer.inserisci_landmarks.active:
             mapped = self.map_to_pixmap_coordinates(event.position())
             name = self.viewer.landmark_combo.currentText()
-            
+
             self.viewer.inserisci_landmarks.handle_click(name, mapped)
             self.viewer.setCursor(Qt.CrossCursor)
 
@@ -82,7 +93,7 @@ class ClickableLabel(QLabel):
             else:
                 mapped = self.map_to_pixmap_coordinates(event.position())
                 self.viewer.spezzata_curva.handle_click(mapped)
-        
+
         elif not self.viewer.selection_mode and event.button() == Qt.LeftButton:
             self.viewer.drag_start_pos = event.position()
             self.setCursor(Qt.ClosedHandCursor)
@@ -93,9 +104,7 @@ class ClickableLabel(QLabel):
             self.viewer.end_point = mapped_pos
             self.viewer.selecting = True
 
-
     def mouseMoveEvent(self, event):
-
         if self.viewer.selection_mode and self.viewer.selecting:
             mapped_pos = self.map_to_pixmap_coordinates(event.position())
             self.viewer.end_point = mapped_pos
@@ -110,9 +119,14 @@ class ClickableLabel(QLabel):
             self.viewer.layer_manager.draw_rect("zoom_preview", rect)
             self.viewer.layer_manager.update_display()
 
-
         elif not self.viewer.selection_mode and event.buttons() == Qt.LeftButton:
-            if not hasattr(self.viewer, 'view_rect') or self.viewer.drag_start_pos is None:
+            print(f"{self.viewer.selection_mode=}")
+
+            if self.viewer.inserisci_landmarks.active or self.viewer.spezzata_curva.active:
+                print("RETURN")
+                return
+
+            if not hasattr(self.viewer, "view_rect") or self.viewer.drag_start_pos is None:
                 return
 
             dx = event.position().x() - self.viewer.drag_start_pos.x()
@@ -194,14 +208,14 @@ class ClickableLabel(QLabel):
 
         return QPointF(corrected_x, corrected_y)
 
+
 class ImageViewer(QMainWindow):
     def __init__(self):
         super().__init__()
-        
+
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
-        
-       
+
         self.debug_mode = False
 
         grid = QGridLayout()
@@ -213,34 +227,52 @@ class ImageViewer(QMainWindow):
 
         # inizializzo lista landamarks, semilandmarks, scale
         self.scale = {"DISTANCE": None}
-        self.landmark_names = ["SNOUT", "VENT", 
-                          "LHead1", "LHead2", "RHead1", "RHead2",
-                          "LArmPit", "LElb", "LMCarp", "LFingerHand", 
-                          "RArmPit", "RElb", "RMCarp", "RFingerHand",
-                          "LKnee", "LTar", "LToe",
-                          "RKnee", "RTar", "RToe"]
-        self.landmarks_groups = {'SVL': {"landmarks": ["SNOUT", "VENT"], "angles": []},
-                            'HEAD': {"landmarks": ["SNOUT","LHead1", "LHead2", "LArmPit", "RArmPit","RHead2", "RHead1", "SNOUT"], "angles": []}, 
-                            "L_FORELIMB": {"landmarks":["LArmPit", "LElb", "LMCarp", "LFingerHand"], "angles":[180, 90, 0, 0]}, 
-                            "R_FORELIMB": {"landmarks":["RArmPit", "RElb", "RMCarp", "RFingerHand"],"angles": [0, -90, 0, 0]},
-                            "L_HINDLIMB": {"landmarks":["VENT","LKnee", "LTar", "LToe"], "angles": [180, -90, 90, 90]},
-                            "R_HINDLIMB": {"landmarks":["VENT","RKnee", "RTar", "RToe"], "angles": [0, 90, -90, -90]} 
-                            }
-        self.semilandmarks ={'MUSO_Sx': {"landmarks":["LHead2", "SNOUT"], "nsemilandmarks": [8],"coordinates":[]},
-                             'MUSO_Dx': {"landmarks":["RHead2", "SNOUT"], "nsemilandmarks": [8],"coordinates":[]}
-                            }
+        self.angle_deg = 0
+        self.landmark_names = [
+            "SNOUT",
+            "VENT",
+            "LHead1",
+            "LHead2",
+            "RHead1",
+            "RHead2",
+            "LArmPit",
+            "LElb",
+            "LMCarp",
+            "LFingerHand",
+            "RArmPit",
+            "RElb",
+            "RMCarp",
+            "RFingerHand",
+            "LKnee",
+            "LTar",
+            "LToe",
+            "RKnee",
+            "RTar",
+            "RToe",
+        ]
+        self.landmarks_groups = {
+            "SVL": {"landmarks": ["SNOUT", "VENT"], "angles": []},
+            "HEAD": {"landmarks": ["SNOUT", "LHead1", "LHead2", "LArmPit", "RArmPit", "RHead2", "RHead1", "SNOUT"], "angles": []},
+            "L_FORELIMB": {"landmarks": ["LArmPit", "LElb", "LMCarp", "LFingerHand"], "angles": [180, 90, 0, 0]},
+            "R_FORELIMB": {"landmarks": ["RArmPit", "RElb", "RMCarp", "RFingerHand"], "angles": [0, -90, 0, 0]},
+            "L_HINDLIMB": {"landmarks": ["VENT", "LKnee", "LTar", "LToe"], "angles": [180, -90, 90, 90]},
+            "R_HINDLIMB": {"landmarks": ["VENT", "RKnee", "RTar", "RToe"], "angles": [0, 90, -90, -90]},
+        }
+        self.semilandmarks = {
+            "MUSO_Sx": {"landmarks": ["LHead2", "SNOUT"], "nsemilandmarks": [8], "coordinates": []},
+            "MUSO_Dx": {"landmarks": ["RHead2", "SNOUT"], "nsemilandmarks": [8], "coordinates": []},
+        }
 
         self.landmarks = self.init_landmarks(self.landmark_names)
-        
-        self.scale_factor = 1    
-        #self.plugin_calibrazione = CalibrationPlugin(self)
+
+        self.scale_factor = 1
+        # self.plugin_calibrazione = CalibrationPlugin(self)
         self.plugin_arti = ArtiPlugin(self)
         self.image = ClickableLabel(self)
         self.image.setAlignment(Qt.AlignCenter)
         self.scroll_area = QScrollArea()
         self.scroll_area.setWidgetResizable(True)
         self.scroll_area.setWidget(self.image)
-
 
         grid.addWidget(self.scroll_area, 0, 0, 6, 10)
 
@@ -252,8 +284,8 @@ class ImageViewer(QMainWindow):
 
         self.landmark_combo = QComboBox()
         self.landmark_combo.addItems(self.landmark_names)
-        grid.addWidget(QLabel("Landmarks"), 8,2,1,1)
-        grid.addWidget(self.landmark_combo, 8,3,1,1)
+        grid.addWidget(QLabel("Landmarks"), 8, 2, 1, 1)
+        grid.addWidget(self.landmark_combo, 8, 3, 1, 1)
 
         self.scaling_mode = QComboBox(self)
         self.scaling_mode.addItems(["Auto width", "Auto height", "Original size"])
@@ -308,7 +340,6 @@ class ImageViewer(QMainWindow):
         self.calibrazione = CalibrationPlugin(self)
         self.gestione_layers = LayerPlugin(self)
 
-       
         # Aggiunta plugin al menu Landmarks
         spezzata_action = QAction("Allinea spezzata", self)
         spezzata_action.triggered.connect(self.spezzata_plugin.start)
@@ -343,17 +374,17 @@ class ImageViewer(QMainWindow):
         align_action = QAction("Allinea immagine", self)
         align_action.triggered.connect(self.image_aligner.align_image)
         edit_menu.addAction(align_action)
-        
+
         # Aggiunta plugin Calibrazione
         calibrazione_action = QAction("Calibra scala", self)
         calibrazione_action.triggered.connect(self.calibrazione.activate)
         edit_menu.addAction(calibrazione_action)
-        
+
         # Aggiunta plugin Gestion_layer
         gestisci_action = QAction("Gestisci layers", self)
         gestisci_action.triggered.connect(self.gestione_layers.activate)
         view_menu.addAction(gestisci_action)
-        
+
         # SHORTCUTS
 
         # Ctrl+L → attiva landmarks
@@ -364,8 +395,7 @@ class ImageViewer(QMainWindow):
         zoom_in_shortcut = QShortcut(QKeySequence("1"), self)
         zoom_in_shortcut.setContext(Qt.ApplicationShortcut)
         zoom_in_shortcut.activated.connect(lambda: self.zoom_plus(1.1))
-        
-        
+
         #  "0" → zoom out
         shortcut_zoom_out = QShortcut(QKeySequence("0"), self)
         shortcut_zoom_out.activated.connect(lambda: self.zoom_plus(0.9))
@@ -376,31 +406,30 @@ class ImageViewer(QMainWindow):
 
         # Shortcut Frecce
         shortcut_left = QShortcut(QKeySequence(Qt.Key_Left), self)
-        shortcut_left.activated.connect(lambda: self.move_view_rect(-1,0))
+        shortcut_left.activated.connect(lambda: self.move_view_rect(-1, 0))
 
         shortcut_right = QShortcut(QKeySequence(Qt.Key_Right), self)
         shortcut_right.activated.connect(lambda: self.move_view_rect(1, 0))
-        
+
         shortcut_up = QShortcut(QKeySequence(Qt.Key_Up), self)
         shortcut_up.activated.connect(lambda: self.move_view_rect(0, -1))
 
         shortcut_down = QShortcut(QKeySequence(Qt.Key_Down), self)
         shortcut_down.activated.connect(lambda: self.move_view_rect(0, 1))
-        
+
         # Dai il focus a un widget che può ricevere eventi
         self.central_widget.setFocusPolicy(Qt.StrongFocus)
         self.central_widget.setFocus()
 
-
         self.show()
         QTimer.singleShot(500, lambda: print("Focus iniziale:", self.focusWidget()))
-    
+
     def move_view_rect(self, dx, dy):
-        if not hasattr(self, 'view_rect') or self.view_rect is None:
+        if not hasattr(self, "view_rect") or self.view_rect is None:
             return
         step = int(self.view_rect.width() * 0.1)
         dx *= step
-        dy *= step  
+        dy *= step
         # Crea una copia del rettangolo corrente
         new_rect = QRect(self.view_rect)
 
@@ -414,24 +443,19 @@ class ImageViewer(QMainWindow):
         # Applica il nuovo rettangolo di vista
         self.set_view_rect(new_rect)
 
-        
     def load(self):
-        file_path, _ = QFileDialog.getOpenFileName(
-            self, "Scegli un'immagine", "", f"Immagini (*.{IMAGE_EXTENSION})"
-        )
+        file_path, _ = QFileDialog.getOpenFileName(self, "Scegli un'immagine", "", f"Immagini (*.{IMAGE_EXTENSION})")
         if not file_path:
             return
         self.glb = [file_path]
         self.idx = 0
         self.load_image(self.glb[self.idx])
-        
-
 
     def load_image(self, file_name):
         self.reset_all()
         self.pixmap = QPixmap()
         self.pixmap.load(file_name)
-        
+
         self.view_rect = QRect(0, 0, self.pixmap.width(), self.pixmap.height())
         mode = self.scaling_mode.currentText()
         screen_geom = self.screen().availableGeometry()
@@ -443,9 +467,9 @@ class ImageViewer(QMainWindow):
             scaled_pixmap = self.pixmap.scaledToHeight(target_height, Qt.SmoothTransformation)
         else:
             scaled_pixmap = self.pixmap
-        
+
         self.scaled_pixmap = scaled_pixmap
-        
+
         self.image.setPixmap(scaled_pixmap)
         self.nome_file = pl.Path(file_name).name
         self.DIR_PNG = os.path.dirname(file_name)
@@ -453,20 +477,15 @@ class ImageViewer(QMainWindow):
         self.layer_manager.create_layer("spezzata")
         self.layer_manager.create_layer("landmarks")
         self.layer_manager.create_layer("zoom_preview")
-        #self.layer_manager.update_display()
+        # self.layer_manager.update_display()
 
     def init_landmarks(self, nomi):
         """
         Inizializza la struttura dei landmark con lista di nomi.
         Ogni landmark ha: coordinate=[], color=None
         """
-       
-        self.landmarks = {
-            nome: {
-                'coordinates': [],
-                'color': None
-            } for nome in nomi
-        }   
+
+        self.landmarks = {nome: {"coordinates": [], "color": None} for nome in nomi}
         return self.landmarks
 
     def rotate_image_dialog(self):
@@ -496,7 +515,7 @@ class ImageViewer(QMainWindow):
         container_size = self.scroll_area.viewport().size()
         container_ratio = container_size.width() / container_size.height()
         sel_ratio = sel_rect.width() / sel_rect.height() if sel_rect.height() > 0 else 1
-       
+
         adjusted_rect = QRect(sel_rect)
         if sel_ratio < container_ratio:
             new_width = sel_rect.height() * container_ratio
@@ -516,34 +535,26 @@ class ImageViewer(QMainWindow):
         scaled = cropped.scaled(container_size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         self.scaled_pixmap = scaled
 
-        
         self.image.setPixmap(scaled)
-    
+
     def zoom_to_selection(self):
         if self.start_point is None or self.end_point is None:
             return
-        
+
         x1, y1 = self.start_point.x(), self.start_point.y()
         x2, y2 = self.end_point.x(), self.end_point.y()
 
-        sel_rect_original = QRect(
-            int(min(x1, x2)),
-            int(min(y1, y2)),
-            int(abs(x2 - x1)),
-            int(abs(y2 - y1))
-        )
+        sel_rect_original = QRect(int(min(x1, x2)), int(min(y1, y2)), int(abs(x2 - x1)), int(abs(y2 - y1)))
 
         # Intersezione con i limiti dell'immagine originale
         full_rect = QRect(0, 0, self.pixmap.width(), self.pixmap.height())
         corrected_rect = sel_rect_original.intersected(full_rect)
 
-        
         self.set_view_rect(corrected_rect)
         self.layer_manager.update_display()
-        
 
     def zoom_plus(self, factor):
-        if not hasattr(self, 'pixmap') or self.pixmap.isNull():
+        if not hasattr(self, "pixmap") or self.pixmap.isNull():
             print("Nessuna immagine caricata, impossibile zoommare")
             return
 
@@ -587,7 +598,7 @@ class ImageViewer(QMainWindow):
         new_x = int(center_x - new_width / 2)
         new_y = int(center_y - new_height / 2)
         new_rect = QRect(new_x, new_y, int(new_width), int(new_height))
-        
+
         self.set_view_rect(new_rect)
 
         # Imposta nuovo punto di partenza per eventuale drag
@@ -595,7 +606,6 @@ class ImageViewer(QMainWindow):
         self.drag_start_pos = cursor_pos
 
         self.layer_manager.update_display()
-
 
     def reset_view_rect(self):
         if self.pixmap:
@@ -612,7 +622,7 @@ class ImageViewer(QMainWindow):
         self.activate_selector_button.setChecked(False)
         if self.inserisci_landmarks.active or self.spezzata_plugin.active:
             self.image.setCursor(Qt.CrossCursor)
-    
+
     def toggle_selection_mode(self):
         self.selection_mode = self.activate_selector_button.isChecked()
         if self.selection_mode:
@@ -646,7 +656,6 @@ class ImageViewer(QMainWindow):
         # Imposta anche il cursore globale
         QApplication.setOverrideCursor(Qt.ArrowCursor)
 
-    
     def reset_all(self):
         print("[reset_all] Reset globale in corso...")
 
