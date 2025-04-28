@@ -5,7 +5,6 @@ from PySide6.QtWidgets import (
     QWidget,
     QLabel,
     QComboBox,
-    QComboBox,
     QPushButton,
     QMessageBox,
     QGridLayout,
