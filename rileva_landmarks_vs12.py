@@ -5,14 +5,10 @@ from PySide6.QtWidgets import (
     QWidget,
     QLabel,
     QComboBox,
-    QHBoxLayout,
     QComboBox,
-    QLineEdit,
     QPushButton,
     QMessageBox,
     QGridLayout,
-    QSpacerItem,
-    QSizePolicy,
     QFileDialog,
     QScrollArea,
     QMainWindow,
@@ -20,14 +16,11 @@ from PySide6.QtWidgets import (
     QMenu,
     QInputDialog,
 )
-from PySide6.QtGui import QAction, QPixmap, QPainter, QColor, QMouseEvent, QTransform, QCursor
-from PySide6.QtGui import QMouseEvent, QPainter, QColor, QPixmap
-from PySide6.QtCore import Qt, QPoint, QSize, QRect, QEvent, QPointF, QTimer
-from PySide6.QtGui import QKeyEvent, QKeySequence, QShortcut
+from PySide6.QtGui import QAction, QPixmap, QTransform, QCursor
+from PySide6.QtCore import Qt, QPoint, QRect, QEvent, QPointF, QTimer
+from PySide6.QtGui import QKeySequence, QShortcut
 
-import glob
 import pathlib as pl
-import numpy as np
 
 from layer_manager import LayerManager
 from plugin_allinea_spezzata import SpezzataAligner
