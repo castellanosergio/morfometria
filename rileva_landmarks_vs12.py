@@ -31,6 +31,7 @@ from plugin_spezzata_curva import SpezzataCurva
 from plugin_calibrazione import CalibrationPlugin
 from plugin_gestione_layers import LayerPlugin
 
+import save_data
 
 __version__ = "2025.0"
 IMAGE_EXTENSION = "jpg"
@@ -629,7 +630,8 @@ class ImageViewer(QMainWindow):
         self.layer_manager.update_display()
 
     def save_data(self):
-        self.show_working_message()
+        save_data.save_data_json(self)
+        #self.show_working_message()
 
     def show_working_message(self):
         QMessageBox.information(self, "Info", "Working in progress")
