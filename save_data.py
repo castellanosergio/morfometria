@@ -11,15 +11,9 @@ def save_data_json(viewer):
     if not viewer.nome_file:
         QMessageBox.critical(None, "Warning", "No image loaded")
         return
-    # ask for info
-    code, ok = QInputDialog.getText(None, "Enter individual info", "Code:")
-    if not (ok and code):
-        QMessageBox.critical(None, "Warning", "The individual code is mandatory")
-        return
 
-    # ask for info
+    # ask for code
     code, ok = QInputDialog.getText(None, "Enter individual info", "Code:")
-
     if not ok:
         QMessageBox.information(
             None,
@@ -27,7 +21,6 @@ def save_data_json(viewer):
             "Data not saved",
         )
         return
-
     if not code:
         QMessageBox.critical(None, "Warning", "The individual code is mandatory")
         return
@@ -38,8 +31,8 @@ def save_data_json(viewer):
         "Enter the mass value",  # dialog title
         "Mass (in g):",  # label text
         value=0.0,  # default value
-        min=0.0,  # minimum allowed value
-        max=100.0,  # maximum allowed value
+        minValue=0.0,  # minimum allowed value
+        maxValue=100.0,  # maximum allowed value
         decimals=2,  # number of decimal places
     )
 
