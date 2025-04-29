@@ -34,7 +34,7 @@ from plugin_gestione_layers import LayerPlugin
 import save_data
 
 __version__ = "2025.0"
-IMAGE_EXTENSION = "jpg"
+IMAGE_EXTENSION = "*.jpg *.JPG"
 
 
 class ClickableLabel(QLabel):
@@ -437,7 +437,7 @@ class ImageViewer(QMainWindow):
         self.set_view_rect(new_rect)
 
     def load(self):
-        file_path, _ = QFileDialog.getOpenFileName(self, "Scegli un'immagine", "", f"Immagini (*.{IMAGE_EXTENSION})")
+        file_path, _ = QFileDialog.getOpenFileName(self, "Scegli un'immagine", "", f"Immagini ({IMAGE_EXTENSION});;All files (*)")
         if not file_path:
             return
         self.glb = [file_path]
