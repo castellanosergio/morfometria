@@ -133,6 +133,14 @@ class LayerManager:
         if name in self.layers:
             self.layers[name].save(path)
 
+    def delete_layer(self, name):
+        """Rimuove completamente il layer dalla memoria"""
+        if name in self.layers:
+            del self.layers[name]
+        if name in self.visible:
+            del self.visible[name]
+        self.update_display()
+        
     def clear_all_layers(self):
         """Cancella tutti i layer e aggiorna la visualizzazione"""
         print("[LayerManager] clear_all_layers() chiamato")

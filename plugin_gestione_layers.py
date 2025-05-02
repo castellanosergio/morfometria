@@ -6,6 +6,7 @@ class LayerPlugin:
 
     def activate(self):
         dialog = LayerManagerDialog(self.viewer)
+        self.viewer.disattiva_zoom()
         dialog.exec()
 
 class LayerManagerDialog(QDialog):
@@ -25,7 +26,7 @@ class LayerManagerDialog(QDialog):
 
         # Pulsanti per azioni
         btn_layout = QHBoxLayout()
-        self.btn_attiva = QPushButton("Attiva")
+        self.btn_attiva = QPushButton("Attiva/Disattiva")
         self.btn_ripulisci = QPushButton("Ripulisci")
         self.btn_cancella = QPushButton("Cancella")
         btn_layout.addWidget(self.btn_attiva)
@@ -57,24 +58,30 @@ class LayerManagerDialog(QDialog):
 
     def attiva_layer(self):
         layer = self.get_selected_layer()
-        if layer:
-            layer.visible = True  # esempio
-            print(f"Layer '{layer}' attivato")
+        self.viewer.layer_manager.toggle_visibility(layer)
+        #print(f"Layer '{layer}' attivato")
 
     def ripulisci_layer(self):
         layer = self.get_selected_layer()
-        if layer:
-            if hasattr(layer, 'clear'):
-                layer.clear()
-            print(f"Layer '{layer}' ripulito")
+        self.viewer.layer_manager.clear_layer(layer)
+        print(f"Layer '{layer}' ripulito")
+        if layer == "landmarks":
+            for dati in self.viewer.landmarks.values():
+                dati["coordinates"] = None
+            #print(self.viewer.landmarks)
+            self.viewer.landmark_combo.setCurrentIndex(0)
+        self.update_layers()
 
     def cancella_layer(self):
         layer = self.get_selected_layer()
-        if layer:
-            self.viewer.layer_manager.remove(layer)
-            print(f"Layer '{layer}' cancellato")
-            self.layer_combo.clear()
-            self.layer_combo.addItems(self.get_layer_names())
+        self.viewer.layer_manager.delete_layer(layer)
+        print(f"Layer '{layer}' cancellato")
+        if layer == "landmarks":
+            for dati in self.viewer.landmarks.values():
+                dati["coordinates"] = None
+            self.viewer.landmark_combo.setCurrentIndex(0)
+        self.layer_combo.clear()
+        self.layer_combo.addItems(self.get_layer_names())
 
     def update_layers(self):
         print("update_layers avviato")

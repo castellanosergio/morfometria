@@ -190,7 +190,7 @@ class ClickableLabel(QLabel):
             self.viewer.selecting = False
 
             # Pulisce il layer temporaneo del rettangolo
-            self.viewer.layer_manager.clear_layer("zoom_preview")
+            self.viewer.layer_manager.delete_layer("zoom_preview")
             self.viewer.layer_manager.update_display()
 
             # Esegue lo zoom
@@ -311,7 +311,9 @@ class ImageViewer(QMainWindow):
         self.scale_factor = 1
         # self.plugin_calibrazione = CalibrationPlugin(self)
         self.plugin_arti = ArtiPlugin(self)
+        
         self.image = ClickableLabel(self)
+        
         self.image.setAlignment(Qt.AlignCenter)
         self.scroll_area = QScrollArea()
         self.scroll_area.setWidgetResizable(True)
@@ -528,9 +530,9 @@ class ImageViewer(QMainWindow):
         self.nome_file = pl.Path(file_name).name
         self.DIR_PNG = os.path.dirname(file_name)
 
-        self.layer_manager.create_layer("spezzata")
-        self.layer_manager.create_layer("landmarks")
-        self.layer_manager.create_layer("zoom_preview")
+        #self.layer_manager.create_layer("spezzata")
+        #self.layer_manager.create_layer("landmarks")
+        #self.layer_manager.create_layer("zoom_preview")
         # self.layer_manager.update_display()
 
     def init_landmarks(self, nomi):
