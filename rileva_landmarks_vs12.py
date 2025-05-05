@@ -258,6 +258,13 @@ class ImageViewer(QMainWindow):
         grid.addWidget(QLabel("Landmarks"), 8, 2, 1, 1)
         grid.addWidget(self.landmark_combo, 8, 3, 1, 1)
 
+        self.scaling_mode = QComboBox(self)
+        self.scaling_mode.addItems(["Auto width", "Auto height", "Original size"])
+        self.scaling_mode.setCurrentIndex(1)
+        self.scale_label = QLabel("Scala immagine:")
+        grid.addWidget(self.scale_label, 8, 0, 1, 1)
+        grid.addWidget(self.scaling_mode, 8, 1, 1, 1)
+
         self.save_data_button = QPushButton("Salva dati")
         self.save_data_button.clicked.connect(self.save_data)
         grid.addWidget(self.save_data_button, 8, 9, 1, 1)
@@ -305,6 +312,12 @@ class ImageViewer(QMainWindow):
         self.calibrazione = CalibrationPlugin(self)
         self.gestione_layers = LayerPlugin(self)
 
+        # Aggiunta plugin al menu Landmarks
+        spezzata_action = QAction("Allinea spezzata", self)
+        spezzata_action.triggered.connect(self.spezzata_plugin.start)
+        landmarks_menu.addAction(spezzata_action)
+
+        # Aggiunta plugin al menu Landmarks
         arti_action = QAction("Crea Spezzata Idealizzata", self)
         arti_action.triggered.connect(self.plugin_arti.activate)
         landmarks_menu.addAction(arti_action)
@@ -316,6 +329,8 @@ class ImageViewer(QMainWindow):
 
         # Aggiunta plugin al menu Landmarks
         contour_action = QAction("Find contours", self)
+        contour_action.triggered.connect(self.rileva_contorno.extract_contours)
+        landmarks_menu.addAction(contour_action)
 
         # Aggiunta plugin al menu Landmarks
         spezzatacurva_action = QAction("SemiLandmarks manuali", self)
