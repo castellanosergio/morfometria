@@ -446,6 +446,9 @@ class ImageViewer(QMainWindow):
         self.code = d["code"]
         self.mass_value = d["mass_value"]
         self.landmarks = d["landmarks"]
+        
+        print(self.landmarks)
+
         self.semilandmarks = d["semilandmarks"]
 
         self.rotate_angle(self.angle_deg)

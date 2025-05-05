@@ -53,6 +53,7 @@ class LayerManager:
 
     def draw_lines(self, name, points, color):
         """Disegna una lista di coppie di punti [(p1, p2), ...] su un layer"""
+        points = [tuple(point) for point in points]
         # print("NOME del LAYER", name)
         if name not in self.layers:
             self.create_layer(name)
@@ -61,7 +62,7 @@ class LayerManager:
         print("POINTS", points)
         segmenti = list(zip(points[:-1], points[1:]))
         print("SEGMENTI", segmenti)
-        print(f"{p1=}")
+        #print(f"{p1=}")
         for p1, p2 in segmenti:
             if isinstance(p1, tuple):
                 p1 = QPointF(p1[0], p1[1])
