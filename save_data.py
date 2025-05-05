@@ -13,7 +13,7 @@ def save_data_json(viewer):
         return
 
     # ask for code
-    code, ok = QInputDialog.getText(None, "Enter individual info", "Code:")
+    code, ok = QInputDialog.getText(None, "Enter individual info", "Code and date:")
     if not ok:
         QMessageBox.information(
             None,
@@ -51,8 +51,9 @@ def save_data_json(viewer):
         "image_file_name": viewer.nome_file,
         "directory_path": viewer.DIR_PNG,
         "scale": viewer.scale,
-        "scale_factor": viewer.scale_factor,
-        "landmarks_groups": viewer.landmarks_groups,
+        "scale_unit": viewer.scale_unit,
+        # "landmarks_groups": viewer.landmarks_groups,
+        "landmarks": viewer.landmarks,
         "semilandmarks": viewer.semilandmarks,
     }
     print(f"{data=}")

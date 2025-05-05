@@ -61,11 +61,13 @@ class LayerManager:
         print("POINTS", points)
         segmenti = list(zip(points[:-1], points[1:]))
         print("SEGMENTI", segmenti)
+        print(f"{p1=}")
         for p1, p2 in segmenti:
             if isinstance(p1, tuple):
                 p1 = QPointF(p1[0], p1[1])
             if isinstance(p2, tuple):
                 p2 = QPointF(p2[0], p2[1])
+            print(f"{p1=}")
             painter.drawLine(p1, p2)
         painter.end()
         self.update_display()
@@ -140,7 +142,7 @@ class LayerManager:
         if name in self.visible:
             del self.visible[name]
         self.update_display()
-        
+
     def clear_all_layers(self):
         """Cancella tutti i layer e aggiorna la visualizzazione"""
         print("[LayerManager] clear_all_layers() chiamato")
