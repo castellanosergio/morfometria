@@ -4,6 +4,7 @@ Save data
 
 from PySide6.QtWidgets import QInputDialog, QMessageBox
 from pathlib import Path
+import os
 import json
 
 
@@ -57,9 +58,9 @@ def save_data_json(viewer):
         "semilandmarks": viewer.semilandmarks,
     }
     print(f"{data=}")
-
+    nome_file_salvato = os.path.join(viewer.DIR_PNG, viewer.nome_file)
     try:
-        with open(Path(viewer.nome_file).with_suffix(".json"), "w") as f_in:
+        with open(Path(nome_file_salvato).with_suffix(".json"), "w") as f_in:
             json.dump(data, f_in, indent=0)
         QMessageBox.information(
             None,
