@@ -473,6 +473,13 @@ class ImageViewer(QMainWindow):
         if pl.Path(file_path).with_suffix(".json").is_file():
             self.load_json(pl.Path(file_path).with_suffix(".json"))
 
+            self.status_bar.showMessage(f"Image loaded: {self.code} (json file found)")
+
+        else:
+            self.status_bar.showMessage(
+                f"Image loaded: {self.code} (no json file found)"
+            )
+
     def load_json(self, file_path):
         """
         load json file
@@ -494,16 +501,12 @@ class ImageViewer(QMainWindow):
             else:
                 self.landmarks[key] = {"coordinates": None, "color": None}
 
-        print(self.landmarks)
-
         self.semilandmarks = d["semilandmarks"]
 
         self.rotate_angle(self.angle_deg)
 
         if self.scale:
             self.scale_label.setText(f"Scala: {self.scale:.4f} {self.scale_unit}/px")
-
-        self.status_bar.showMessage(f"Image loaded: {self.code}")
 
     def load_image(self, file_name):
         self.reset_all()

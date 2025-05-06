@@ -4,7 +4,7 @@ Save data
 
 from PySide6.QtWidgets import QInputDialog, QMessageBox
 from pathlib import Path
-import os
+import re
 import json
 
 
@@ -13,23 +13,47 @@ def save_data_json(viewer):
         QMessageBox.critical(None, "Warning", "No image loaded")
         return
 
-    # ask for code
-    code, ok = QInputDialog.getText(
-        None,
-        "Enter individual info",
-        "Code and date (CODE_NN_YYYY-MM-DD):",
-        text=viewer.code,
-    )
-    if not ok:
-        QMessageBox.information(
+    code = viewer.code
+
+    while True:
+        # ask for code
+        code, ok = QInputDialog.getText(
             None,
-            "Warning",
-            "Data not saved",
+            "Enter individual info",
+            "Code and date (CODE_NN_YYYY-MM-DD):",
+            text=code,
         )
-        return
-    if not code:
-        QMessageBox.critical(None, "Warning", "The individual code is mandatory")
-        return
+        if not ok:
+            QMessageBox.information(
+                None,
+                "Warning",
+                "Data not saved",
+            )
+            return
+
+        if not code:
+            QMessageBox.critical(None, "Warning", "The code is mandatory")
+            continue
+
+        if " " in code:
+            QMessageBox.critical(None, "Warning", "The code cannot contain space")
+            continue
+
+        # check code
+        if code.count("_") < 2:
+            QMessageBox.critical(None, "Warning", "The code must contain almost 2 _ ")
+            continue
+
+        # Regex pattern for YYYY-MM-DD
+        pattern = r"_\d{4}-\d{2}-\d{2}\b"
+
+        if not re.search(pattern, code):
+            QMessageBox.critical(
+                None, "Warning", "The code does not contain a date in YYYY-MM-DD format"
+            )
+            continue
+
+        break
 
     # ask for mass
     mass_value, ok = QInputDialog.getDouble(
@@ -68,15 +92,19 @@ def save_data_json(viewer):
     try:
         with open(json_file_path, "w") as f_in:
             json.dump(data, f_in, indent=0)
-        QMessageBox.information(
-            None,
-            "Information",
-            f"Data saved in {json_file_path}",
-        )
 
         # rename image file
         viewer.file_path.rename(
             viewer.file_path.parent / Path(code).with_suffix(".jpg")
+        )
+
+        if viewer.file_path.with_suffix(".json") != json_file_path:
+            viewer.file_path.with_suffix(".json").unlink()
+
+        QMessageBox.information(
+            None,
+            "Information",
+            f"Data saved in {json_file_path}",
         )
 
     except Exception as e:
