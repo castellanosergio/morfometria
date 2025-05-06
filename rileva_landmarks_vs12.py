@@ -414,6 +414,7 @@ class ImageViewer(QMainWindow):
 
         # Applica il nuovo rettangolo di vista
         self.set_view_rect(new_rect)
+        self.layer_manager.update_display()
 
     def load(self):
         file_path, _ = QFileDialog.getOpenFileName(
