@@ -11,6 +11,8 @@ class ImageAligner:
         self.active = False
 
     def align_image(self):
+        self.viewer.mode_label.setText("ALIGNMENT MODE")
+
         self.points = []
         self.active = True
         self.viewer.disattiva_zoom()
@@ -28,7 +30,9 @@ class ImageAligner:
 
         self.points.append(pos)
 
-        self.viewer.layer_manager.draw_points("axis_definition", self.points, color=QColor(0, 100, 255, 150))
+        self.viewer.layer_manager.draw_points(
+            "axis_definition", self.points, color=QColor(0, 100, 255, 150)
+        )
 
         if len(self.points) == 2:
             self.active = False
@@ -41,7 +45,9 @@ class ImageAligner:
         dy = p2.y() - p1.y()
 
         if dx == 0 and dy == 0:
-            QMessageBox.warning(self.viewer, "Errore", "I due punti devono essere distinti.")
+            QMessageBox.warning(
+                self.viewer, "Errore", "I due punti devono essere distinti."
+            )
             return
 
         # Allineamento con asse Y verso l'alto
@@ -52,9 +58,13 @@ class ImageAligner:
         transform.translate(-p1.x(), -p1.y())
         transform.rotate(angle_deg)
 
-        transformed_pixmap = self.viewer.pixmap.transformed(transform, Qt.SmoothTransformation)
+        transformed_pixmap = self.viewer.pixmap.transformed(
+            transform, Qt.SmoothTransformation
+        )
 
-        axis_definition = self.viewer.layer_manager.layers["axis_definition"].transformed(transform, Qt.SmoothTransformation)
+        axis_definition = self.viewer.layer_manager.layers[
+            "axis_definition"
+        ].transformed(transform, Qt.SmoothTransformation)
         self.viewer.layer_manager.layers["axis_definition"] = axis_definition
         self.viewer.layer_manager.visible["axis_definition"] = True
 
@@ -71,5 +81,18 @@ class ImageAligner:
         # self.set_view_rect(corrected_rect)
         self.viewer.layer_manager.update_display()
 
-        QMessageBox.information(self.viewer, "Trasformazione completata", "L'immagine è stata centrata sull'origine e ruotata.")
+        """
+        QMessageBox.information(
+            self.viewer,
+            "Trasformazione completata",
+            "L'immagine è stata centrata sull'origine e ruotata.",
+        )
+        """
+
+        self.viewer.status_bar.showMessage(
+            "Trasformazione completata: l'immagine è stata centrata sull'origine e ruotata."
+        )
+
         self.viewer.layer_manager.clear_layer("axis_definition")
+
+        self.viewer.mode_label.setText("")

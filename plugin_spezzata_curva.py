@@ -1,11 +1,21 @@
 from PySide6.QtCore import QPointF, Qt
-from PySide6.QtWidgets import QMessageBox, QDialog, QVBoxLayout, QComboBox, QDialogButtonBox, QLabel, QButtonGroup, QRadioButton
+from PySide6.QtWidgets import (
+    QMessageBox,
+    QDialog,
+    QVBoxLayout,
+    QComboBox,
+    QDialogButtonBox,
+    QLabel,
+    QButtonGroup,
+    QRadioButton,
+)
 from PySide6.QtGui import QColor
 import numpy as np
 from math import hypot, cos, sin, atan2, pi, degrees
 
+
 class LandmarkSemilandmarkDialog(QDialog):
-    def __init__(self, viewer, default_n = 10):
+    def __init__(self, viewer, default_n=10):
         super().__init__(viewer)
         self.viewer = viewer
         self.setWindowTitle("Seleziona modalità")
@@ -45,7 +55,7 @@ class LandmarkSemilandmarkDialog(QDialog):
         landmark_attivo = self.radio_landmarks.isChecked()
         self.landmark_combo.setEnabled(landmark_attivo)
         self.curva_combo.setEnabled(not landmark_attivo)
-        
+
     def is_landmark_mode(self):
         return self.radio_landmarks.isChecked()
 
@@ -54,6 +64,7 @@ class LandmarkSemilandmarkDialog(QDialog):
 
     def get_selected_curva(self):
         return self.curva_combo.currentText()
+
 
 class SpezzataCurva:
     def __init__(self, viewer):
@@ -64,10 +75,10 @@ class SpezzataCurva:
         self.active = False
         self.show_all_points = True
         self.layer_name = "landmarks"
-        
-        
 
     def start(self):
+        self.viewer.mode_label.setText("SEMI LANDMARKS MODE")
+
         self.points = []
         self.qpoints = []
         self.active = True
@@ -76,14 +87,11 @@ class SpezzataCurva:
         if self.viewer.inserisci_landmarks.active:
             self.viewer.inserisci_landmarks.deactivate()
         QMessageBox.information(
-            self.viewer,
-            "Inserimento Punti",
-            "Clicca due volte per terminare."
+            self.viewer, "Inserimento Punti", "Clicca due volte per terminare."
         )
 
-    
     def handle_click(self, pos: QPointF):
-        # converto QPointF in 
+        # converto QPointF in
         self.viewer.image.setCursor(Qt.CrossCursor)
         pos_tupla = (pos.x(), pos.y())
         self.points.append(pos_tupla)
@@ -91,12 +99,12 @@ class SpezzataCurva:
         self.draw_preview()
 
     def handle_double_click(self):
-        #self.viewer.layer_manager.layers["preview"] = None
+        # self.viewer.layer_manager.layers["preview"] = None
         if len(self.points) < 2:
             QMessageBox.warning(self.viewer, "Errore", "Inserisci almeno due punti.")
             return
-        
-        dialog = LandmarkSemilandmarkDialog(self.viewer, default_n = 10)
+
+        dialog = LandmarkSemilandmarkDialog(self.viewer, default_n=10)
 
         if not dialog.exec():
             return
@@ -104,14 +112,18 @@ class SpezzataCurva:
         if dialog.is_landmark_mode():
             name = dialog.get_selected_landmark()
             punti = self.straighten_polyline(self.qpoints)
-            self.viewer.landmarks[name]['coordinates'] = (punti[-1].x(), punti[-1].y())
-            print("PUNTO AGGIUNTO", self.viewer.landmarks[name]['coordinates'])
+            self.viewer.landmarks[name]["coordinates"] = (punti[-1].x(), punti[-1].y())
+            print("PUNTO AGGIUNTO", self.viewer.landmarks[name]["coordinates"])
             self.viewer.layer_manager.clear_layer(self.layer_name)
             self.viewer.layer_manager.clear_layer(name)
-            self.viewer.layer_manager.draw_points(name, punti, color=QColor(255, 0, 255, 255))
+            self.viewer.layer_manager.draw_points(
+                name, punti, color=QColor(255, 0, 255, 255)
+            )
         else:
             nome_spezzata = dialog.get_selected_curva()
-            nsemilandmarks = self.viewer.semilandmarks[nome_spezzata]["nsemilandmarks"][0]
+            nsemilandmarks = self.viewer.semilandmarks[nome_spezzata]["nsemilandmarks"][
+                0
+            ]
             # -- Landmark da semilandmarks dict --
             namelm1, namelm2 = self.viewer.semilandmarks[nome_spezzata]["landmarks"]
             lm1 = self.viewer.landmarks[namelm1]["coordinates"]
@@ -122,45 +134,54 @@ class SpezzataCurva:
             print("i1", i1, "i2", i2)
             start = min(i1, i2)
             end = max(i1, i2)
-            sottocurva = self.points[start:end+1]
+            sottocurva = self.points[start : end + 1]
             # salvo i semilandmarks nel dizionario
             # Interpolazione sulla sottocurva
-            contorno_spezzato = self.interpolate_line_fixed_number(sottocurva, nsemilandmarks)
+            contorno_spezzato = self.interpolate_line_fixed_number(
+                sottocurva, nsemilandmarks
+            )
             self.viewer.semilandmarks[nome_spezzata]["coordinates"] = contorno_spezzato
             print("CONTORNO SPEZZATO", contorno_spezzato)
-            #trasformo lista di tuple in lista QPointF
+            # trasformo lista di tuple in lista QPointF
             contorno_punti = [QPointF(x, y) for x, y in contorno_spezzato]
             print("CONTORNO PUNTI", contorno_punti)
             self.viewer.layer_manager.clear_layer(self.layer_name)
-            self.viewer.layer_manager.draw_points(self.layer_name, contorno_punti, color=self.color_points)
-            self.viewer.layer_manager.draw_lines(nome_spezzata, contorno_spezzato, color=self.color_points)
+            self.viewer.layer_manager.draw_points(
+                self.layer_name, contorno_punti, color=self.color_points
+            )
+            self.viewer.layer_manager.draw_lines(
+                nome_spezzata, contorno_spezzato, color=self.color_points
+            )
             self.viewer.layer_manager.update_display()
             print(self.viewer.semilandmarks)
         self.active = False
-            
+
+        self.viewer.mode_label.setText("")
 
     def draw_preview(self):
         """Mostra in tempo reale i punti cliccati su layer"""
         self.viewer.layer_manager.clear_layer("preview")
-        self.viewer.layer_manager.draw_points("preview", self.qpoints, color=QColor(0, 255, 0, 255))
+        self.viewer.layer_manager.draw_points(
+            "preview", self.qpoints, color=QColor(0, 255, 0, 255)
+        )
 
     def trova_punto_piu_vicino(self, punto, contorno):
-            # trasformo lista di QPointF in lista di tupla
-            # punti_tuple = [(pt.x(), pt.y()) for pt in contorno]
-            A = np.array(contorno)                
-            B = np.ones_like(A) * punto           
-            diff = A - B                          
-            dist_sq = np.sum(diff**2, axis=1)     
-            indice = np.argmin(dist_sq)           
-            return indice    
-    
+        # trasformo lista di QPointF in lista di tupla
+        # punti_tuple = [(pt.x(), pt.y()) for pt in contorno]
+        A = np.array(contorno)
+        B = np.ones_like(A) * punto
+        diff = A - B
+        dist_sq = np.sum(diff**2, axis=1)
+        indice = np.argmin(dist_sq)
+        return indice
+
     def interpolate_line_fixed_number(self, points, n):
         """Restituisce n+1 punti equidistanti lungo la spezzata definita da `points`."""
         # Calcola le distanze tra i punti consecutivi
         segmenti = list(zip(points[:-1], points[1:]))
         distanze = [hypot(p2[0] - p1[0], p2[1] - p1[1]) for p1, p2 in segmenti]
         lunghezza_totale = sum(distanze)
-        
+
         step = lunghezza_totale / n
 
         new_points = [points[0]]
@@ -169,7 +190,7 @@ class SpezzataCurva:
 
         while i < len(points) - 1:
             p1 = points[i]
-            p2 = points[i+1]
+            p2 = points[i + 1]
             dx = p2[0] - p1[0]
             dy = p2[1] - p1[1]
             d = hypot(dx, dy)
@@ -190,19 +211,19 @@ class SpezzataCurva:
             new_points.append(points[-1])
         print("NEW POINTS", new_points)
         return new_points
-    
+
     def straighten_polyline(self, points):
         if len(points) < 2:
             return points[:]
-        
+
         dx = points[1].x() - points[0].x()
         dy = points[1].y() - points[0].y()
         angolo_con_asse = atan2(dy, dx)
         direction_angle = self.determina_direzione_allineamento(angolo_con_asse)
-        
+
         distances = [
-            hypot(points[i+1].x() - points[i].x(), points[i+1].y() - points[i].y())
-            for i in range(len(points)-1)
+            hypot(points[i + 1].x() - points[i].x(), points[i + 1].y() - points[i].y())
+            for i in range(len(points) - 1)
         ]
 
         dx = cos(direction_angle)
@@ -226,11 +247,15 @@ class SpezzataCurva:
         angolo_normalizzato = angolo_gradi % 360
 
         # Determina la direzione secondo le soglie definite
-        if -45 <= angolo_gradi < 45 or angolo_normalizzato < 45 or angolo_normalizzato >= 315:
+        if (
+            -45 <= angolo_gradi < 45
+            or angolo_normalizzato < 45
+            or angolo_normalizzato >= 315
+        ):
             return 0  # Orizzontale (est)
         elif 45 <= angolo_normalizzato < 135:
-            return pi/2  # Verticale (nord)
+            return pi / 2  # Verticale (nord)
         elif 135 <= angolo_normalizzato < 225:
             return pi  # Orizzontale opposta (ovest)
         elif 225 <= angolo_normalizzato < 315:
-            return -pi/2  # Verticale opposta (sud)
+            return -pi / 2  # Verticale opposta (sud)
