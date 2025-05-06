@@ -446,7 +446,13 @@ class ImageViewer(QMainWindow):
         self.angle_deg = d["angle_deg"]
         self.code = d["code"]
         self.mass_value = d["mass_value"]
-        self.landmarks = d["landmarks"]
+        landmarks_json = d["landmarks"]
+        # rendo possibile aggiungere o eliminare landmarks 
+        for key in self.landmarks:
+            if key in landmarks_json:
+                self.landmarks[key] = landmarks_json[key]
+            else:
+                self.landmarks[key] = {'coordinates': None, 'color': None}
         
         print(self.landmarks)
 

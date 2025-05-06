@@ -3,8 +3,10 @@ landmark_names = [
     "VENT",
     "LHead1",
     "LHead2",
+    "LHead3",
     "RHead1",
     "RHead2",
+    "RHead3",
     "LArmPit",
     "LElb",
     "LMCarp",
@@ -28,8 +30,10 @@ landmarks_groups = {
             "SNOUT",
             "LHead1",
             "LHead2",
+            "LHead3",
             "LArmPit",
             "RArmPit",
+            "RHead3",
             "RHead2",
             "RHead1",
             "SNOUT",
@@ -56,12 +60,12 @@ landmarks_groups = {
 
 semilandmarks = {
     "MUSO_Sx": {
-        "landmarks": ["LHead2", "SNOUT"],
+        "landmarks": ["LHead3", "SNOUT"],
         "nsemilandmarks": [8],
         "coordinates": [],
     },
     "MUSO_Dx": {
-        "landmarks": ["RHead2", "SNOUT"],
+        "landmarks": ["RHead3", "SNOUT"],
         "nsemilandmarks": [8],
         "coordinates": [],
     },
