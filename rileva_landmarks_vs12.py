@@ -480,6 +480,10 @@ class ImageViewer(QMainWindow):
                 f"Image loaded: {self.code} (no json file found)"
             )
 
+        self.setWindowTitle(
+            f"{pl.Path(file_path).name} - Morphometric analysis - v. {__version__}"
+        )
+
     def load_json(self, file_path):
         """
         load json file
@@ -535,6 +539,8 @@ class ImageViewer(QMainWindow):
         self.nome_file = pl.Path(file_name).name
         self.DIR_PNG = pl.Path(file_name).parent
         self.file_path = pl.Path(file_name)
+
+        self.scale_label.setText("")
 
     def init_landmarks(self, nomi):
         """
