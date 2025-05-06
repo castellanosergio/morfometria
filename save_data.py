@@ -14,7 +14,12 @@ def save_data_json(viewer):
         return
 
     # ask for code
-    code, ok = QInputDialog.getText(None, "Enter individual info", "Code and date:")
+    code, ok = QInputDialog.getText(
+        None,
+        "Enter individual info",
+        "Code and date (CODE_NN_YYYY-MM-DD):",
+        text=viewer.code,
+    )
     if not ok:
         QMessageBox.information(
             None,
@@ -31,7 +36,7 @@ def save_data_json(viewer):
         None,  # parent widget
         "Enter the mass value",  # dialog title
         "Mass (in g):",  # label text
-        value=0.0,  # default value
+        value=viewer.mass_value,  # default value
         minValue=0.0,  # minimum allowed value
         maxValue=100.0,  # maximum allowed value
         decimals=2,  # number of decimal places
@@ -49,23 +54,30 @@ def save_data_json(viewer):
         "mass_value": mass_value,
         "code": code,
         "angle_deg": viewer.angle_deg,
-        "image_file_name": viewer.nome_file,
-        "directory_path": viewer.DIR_PNG,
+        # "image_file_name": viewer.nome_file,
+        # "directory_path": viewer.DIR_PNG,
         "scale": viewer.scale,
         "scale_unit": viewer.scale_unit,
-        # "landmarks_groups": viewer.landmarks_groups,
         "landmarks": viewer.landmarks,
         "semilandmarks": viewer.semilandmarks,
     }
     print(f"{data=}")
-    nome_file_salvato = os.path.join(viewer.DIR_PNG, viewer.nome_file)
+
+    json_file_path = viewer.file_path.parent / Path(code).with_suffix(".json")
+
     try:
-        with open(Path(nome_file_salvato).with_suffix(".json"), "w") as f_in:
+        with open(json_file_path, "w") as f_in:
             json.dump(data, f_in, indent=0)
         QMessageBox.information(
             None,
             "Information",
-            f"Data saved in {Path(viewer.nome_file).with_suffix('.json')}",
+            f"Data saved in {json_file_path}",
         )
+
+        # rename image file
+        viewer.file_path.rename(
+            viewer.file_path.parent / Path(code).with_suffix(".jpg")
+        )
+
     except Exception as e:
-        QMessageBox.critical(None, "Warning", e)
+        QMessageBox.critical(None, "Warning", str(e))

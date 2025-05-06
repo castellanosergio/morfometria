@@ -242,6 +242,9 @@ class ImageViewer(QMainWindow):
         self.scale_unit = ""
         self.angle_deg = 0
         self.nome_file = ""
+        self.file_path = pl.Path("")
+        self.code = ""
+        self.mass_value = 0.0
 
         self.landmark_names = settings_landmarks.landmark_names
 
@@ -258,7 +261,7 @@ class ImageViewer(QMainWindow):
         self.setStatusBar(self.status_bar)
 
         # add a label to status bar to show the current mode
-        self.mode_label = QLabel("Persistent info")
+        self.mode_label = QLabel("")
         self.status_bar.addPermanentWidget(self.mode_label)
 
         # self.plugin_calibrazione = CalibrationPlugin(self)
@@ -497,7 +500,10 @@ class ImageViewer(QMainWindow):
 
         self.rotate_angle(self.angle_deg)
 
-        self.scale_label.setText(f"Scala: {self.scale:.4f} {self.scale_unit}/px")
+        if self.scale:
+            self.scale_label.setText(f"Scala: {self.scale:.4f} {self.scale_unit}/px")
+
+        self.status_bar.showMessage(f"Image loaded: {self.code}")
 
     def load_image(self, file_name):
         self.reset_all()
@@ -524,7 +530,8 @@ class ImageViewer(QMainWindow):
 
         self.image.setPixmap(scaled_pixmap)
         self.nome_file = pl.Path(file_name).name
-        self.DIR_PNG = os.path.dirname(file_name)
+        self.DIR_PNG = pl.Path(file_name).parent
+        self.file_path = pl.Path(file_name)
 
     def init_landmarks(self, nomi):
         """
