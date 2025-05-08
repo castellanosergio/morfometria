@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (
     QComboBox,
     QMessageBox,
 )
-from PySide6.QtGui import QPainter, QPen, QColor
+from PySide6.QtGui import QColor
 from PySide6.QtCore import Qt
 import math
 
@@ -72,9 +72,7 @@ class CalibrationPlugin:
         self.viewer.disattiva_zoom()
         self.viewer.image.setCursor(Qt.CrossCursor)
         self.viewer.image.setFocus()
-        QMessageBox.information(
-            self.viewer, "Calibrazione", "Seleziona due punti a distanza nota"
-        )
+        QMessageBox.information(self.viewer, "Calibrazione", "Seleziona due punti a distanza nota")
         self.count = 0
         self.cal_points = []
         self.viewer.image.setCursor(Qt.CrossCursor)
@@ -92,9 +90,7 @@ class CalibrationPlugin:
         print("CALIBRAZIONE IN ATto")
         self.count += 1
         self.cal_points.append(pos)
-        self.viewer.layer_manager.draw_points(
-            "calibration", self.cal_points, color=QColor(255, 0, 0, 180)
-        )
+        self.viewer.layer_manager.draw_points("calibration", self.cal_points, color=QColor(255, 0, 0, 180))
         if self.count == 2:
             self.calibrate(self.cal_points)
             self.cal_points = []
@@ -102,9 +98,7 @@ class CalibrationPlugin:
             self.deactivate()
 
     def calibrate(self, points):
-        pixel_len = math.dist(
-            (points[0].x(), points[0].y()), (points[1].x(), points[1].y())
-        )
+        pixel_len = math.dist((points[0].x(), points[0].y()), (points[1].x(), points[1].y()))
         dialog = ScaleDialog(pixel_len, self.viewer)
         if dialog.exec():
             # global scale
@@ -115,6 +109,4 @@ class CalibrationPlugin:
 
             self.viewer.scale_label.setText(f"Scala: {self.viewer.scale:.4f} {unit}/px")
 
-            self.viewer.status_bar.showMessage(
-                f"La scala è stata settata ({self.viewer.scale:.4f} {unit}/px)"
-            )
+            self.viewer.status_bar.showMessage(f"La scala è stata settata ({self.viewer.scale:.4f} {unit}/px)")
