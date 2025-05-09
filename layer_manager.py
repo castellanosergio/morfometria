@@ -13,11 +13,12 @@ class LayerManager:
         """Crea un layer trasparente con lo stesso size dell'immagine attuale"""
         if self.viewer.pixmap is None:
             return
-        size = self.viewer.pixmap.size()
-        pixmap = QPixmap(size)
-        pixmap.fill(Qt.transparent)
-        self.layers[name] = pixmap
-        self.visible[name] = True
+        if name not in self.layers:
+            size = self.viewer.pixmap.size()
+            pixmap = QPixmap(size)
+            pixmap.fill(Qt.transparent)
+            self.layers[name] = pixmap
+            self.visible[name] = True
 
     def draw_rect(self, name, rect, color=QColor(0, 255, 0, 180), fill=QColor(0, 255, 0, 60)):
         # print("RECT", rect)
@@ -34,7 +35,7 @@ class LayerManager:
 
     def draw_points(self, name, points, color=Qt.red):
         points = [QPointF(pt[0], pt[1]) if isinstance(pt, tuple) else pt for pt in points]
-        print(points)
+        #print(points)
         """Disegna una lista di QPointF su un layer"""
         zoom_factor = self.viewer.pixmap.width() / self.viewer.view_rect.width()
         radius = int(10 / zoom_factor)
@@ -68,7 +69,7 @@ class LayerManager:
                 p1 = QPointF(p1[0], p1[1])
             if isinstance(p2, tuple):
                 p2 = QPointF(p2[0], p2[1])
-            print(f"{p1=}")
+            #print(f"{p1=}")
             painter.drawLine(p1, p2)
         painter.end()
         self.update_display()
@@ -118,6 +119,17 @@ class LayerManager:
                 painter.setPen(Qt.NoPen)
                 for pt in punti:
                     painter.drawEllipse(pt, radius, radius)
+
+            elif name == "semilandmarks":
+                punti = []
+                for nome, info in self.viewer.semilandmarks.items():
+                    punti = info.get("coordinates")
+                    print(f"punti: {punti}")
+                    painter.setBrush(QColor(0, 255, 0, 180))
+                    painter.setPen(Qt.NoPen)
+                    for pt in punti:
+                        pt = QPointF(*pt)
+                        painter.drawEllipse(pt, radius, radius)
 
             else:
                 # Disegna normalmente il layer (come pixmap)

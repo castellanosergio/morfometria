@@ -234,7 +234,7 @@ class ImageViewer(QMainWindow):
         self.landmarks_groups = settings_landmarks.landmarks_groups
 
         self.semilandmarks = settings_landmarks.semilandmarks
-
+        print(self.semilandmarks)
         self.landmarks = self.init_landmarks(self.landmark_names)
 
         self.scale_factor = 1
@@ -475,14 +475,27 @@ class ImageViewer(QMainWindow):
         self.code = d["code"]
         self.mass_value = d["mass_value"]
         landmarks_json = d["landmarks"]
+        
         # rendo possibile aggiungere o eliminare landmarks
         for key in self.landmarks:
             if key in landmarks_json:
                 self.landmarks[key] = landmarks_json[key]
+                if self.landmarks[key]["coordinates"] != None:
+                    check = 1
             else:
                 self.landmarks[key] = {"coordinates": None, "color": None}
-
-        self.semilandmarks = d["semilandmarks"]
+            if check == 1:
+                self.layer_manager.create_layer("landmarks")
+        
+        self.semilandmarks_json = d["semilandmarks"]
+        # rendo possibile aggiungere o eliminare semilandmarks
+        
+        for key in self.semilandmarks:
+            if self.semilandmarks[key]["landmarks"] == self.semilandmarks_json[key]["landmarks"]:
+                coord = self.semilandmarks_json[key].get("coordinates",[])
+                self.semilandmarks[key]["coordinates"] = coord
+                
+                self.layer_manager.create_layer("semilandmarks")
 
         self.rotate_angle(self.angle_deg)
 
@@ -540,9 +553,6 @@ class ImageViewer(QMainWindow):
         self.pixmap = rotated_pixmap  # aggiorna anche l'originale
         self.image.setPixmap(scaled_rotated)
         self.reset_view_rect()
-        self.layer_manager.create_layer("spezzata")
-        self.layer_manager.create_layer("landmarks")
-        self.layer_manager.create_layer("zoom_preview")
         self.layer_manager.update_display()
 
     def resizeEvent(self, event):
