@@ -1,6 +1,6 @@
 [project]
 name = "Morfometria"
-version = "0.0.1"
+version = "0.0.2"
 description = "Morfometria"
 authors = [{ name="Sergio Castellano", email="sergio.castellano@unito.it" }, { name="Olivier Friard", email="olivier.friard@unito.it" }]
 readme = "README.md"
