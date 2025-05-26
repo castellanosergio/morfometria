@@ -2,7 +2,7 @@ from PySide6.QtGui import QColor
 from PySide6.QtCore import QPointF, Qt
 import math
 
-import landmarks
+from . import landmarks
 
 
 class ArtiPlugin:
@@ -14,20 +14,20 @@ class ArtiPlugin:
         self.active = True
         self.viewer.disattiva_zoom()
         self.viewer.image.setCursor(Qt.CrossCursor)
-        #self.nomi = self.viewer.landmark_names
+        # self.nomi = self.viewer.landmark_names
         LD_groups = list(self.viewer.landmarks_groups.keys())
         for layer_name in ["landmarks", "spezzata", "axis_definition"]:
             if layer_name in self.viewer.layer_manager.visible:
                 self.viewer.layer_manager.visible[layer_name] = False
-        
+
         self.viewer.layer_manager.clear_layer("spezzata_idealizzata")
         self.viewer.layer_manager.clear_layer("landmarks")
         self.viewer.layer_manager.clear_layer("axis_definition")
-        #self.viewer.layer_manager.update_display()
-        
-        #print("LANDMARKS", self.viewer.landmarks)
+        # self.viewer.layer_manager.update_display()
+
+        # print("LANDMARKS", self.viewer.landmarks)
         for gruppo in LD_groups:
-            #print("GRUPPO FUNZIONALE", gruppo)
+            # print("GRUPPO FUNZIONALE", gruppo)
             landmark_names = self.viewer.landmarks_groups[gruppo]["landmarks"]
             angoli = self.viewer.landmarks_groups[gruppo]["angles"]
             nuova_spezzata = []
@@ -42,21 +42,20 @@ class ArtiPlugin:
             else:
                 punti = self.get_landmark_points_by_names(self.viewer.landmarks, landmark_names)
                 print("LLL", landmark_names)
-                
+
             # Aggiorna il dizionario dei landmarks
             lista_tuple = [self.viewer.landmarks[k]["coordinates"] for k in landmark_names]
             lista_qpointf = []
             for coor in lista_tuple:
                 if coor:
                     lista_qpointf.append(QPointF(coor[0], coor[1]))
-                    
+
             self.viewer.layer_manager.draw_points("spezzata_idealizzata", lista_qpointf, color=QColor(255, 0, 0, 180))
-                
+
             if len(nuova_spezzata) > 0:
                 self.viewer.layer_manager.draw_lines("spezzata_idealizzata", nuova_spezzata, color=QColor(0, 255, 0, 180))
             else:
                 self.viewer.layer_manager.draw_lines("spezzata_idealizzata", punti, color=QColor(0, 255, 0, 180))
-           
 
     def get_landmark_points_by_names(self, landmark_dict: dict, names: list[str]) -> list[tuple]:
         missing = [name for name in names if name not in landmark_dict]
