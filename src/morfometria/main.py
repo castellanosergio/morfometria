@@ -40,8 +40,8 @@ from .plugin_gestione_layers import LayerPlugin
 from . import save_data
 from . import settings_landmarks
 
-__version__ = "0.0.1"
-__version_date__ = "2025-05-08"
+__version__ = "0.0.2"
+__version_date__ = "2025-05-26"
 IMAGE_EXTENSION = "*.jpg *.JPG"
 
 
@@ -296,7 +296,7 @@ class ImageViewer(QMainWindow):
         grid.addWidget(self.zoom_out_button, 8, 6, 1, 1)
 
         self.central_widget.setLayout(grid)
-        self.setWindowTitle(f"Morphometric analysis - v. {__version__}")
+        self.setWindowTitle(f"Morphometric analysis - v. {__version__} {__version_date__}")
         self.resize(1000, 700)
 
         self.menu_bar = QMenuBar(self)
@@ -694,7 +694,6 @@ class ImageViewer(QMainWindow):
 
     def save_data(self):
         save_data.save_data_json(self)
-        # self.show_working_message()
 
     def show_working_message(self):
         QMessageBox.information(self, "Info", "Working in progress")

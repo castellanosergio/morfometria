@@ -1,2 +1,3 @@
-from geomorfometria import main
+from morfometria import main
+
 main.run()

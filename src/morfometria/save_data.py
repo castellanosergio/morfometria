@@ -48,9 +48,7 @@ def save_data_json(viewer):
         pattern = r"_\d{4}-\d{2}-\d{2}\b"
 
         if not re.search(pattern, code):
-            QMessageBox.critical(
-                None, "Warning", "The code does not contain a date in YYYY-MM-DD format"
-            )
+            QMessageBox.critical(None, "Warning", "The code does not contain a date in YYYY-MM-DD format")
             continue
 
         break
@@ -94,12 +92,11 @@ def save_data_json(viewer):
             json.dump(data, f_in, indent=0)
 
         # rename image file
-        viewer.file_path.rename(
-            viewer.file_path.parent / Path(code).with_suffix(".jpg")
-        )
+        viewer.file_path.rename(viewer.file_path.parent / Path(code).with_suffix(".jpg"))
 
         if viewer.file_path.with_suffix(".json") != json_file_path:
-            viewer.file_path.with_suffix(".json").unlink()
+            if viewer.file_path.is_file():
+                viewer.file_path.with_suffix(".json").unlink()
 
         QMessageBox.information(
             None,
