@@ -2,8 +2,6 @@ from PySide6.QtGui import QColor
 from PySide6.QtCore import QPointF, Qt
 import math
 
-from . import landmarks
-
 
 class ArtiPlugin:
     def __init__(self, viewer):

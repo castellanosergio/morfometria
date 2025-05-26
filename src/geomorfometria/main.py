@@ -37,11 +37,11 @@ from .rileva_contorno import ContourPlugin
 from .plugin_spezzata_curva import SpezzataCurva
 from .plugin_calibrazione import CalibrationPlugin
 from .plugin_gestione_layers import LayerPlugin
-
 from . import save_data
 from . import settings_landmarks
 
-__version__ = "2025-05-08"
+__version__ = "0.0.1"
+__version_date__ = "2025-05-08"
 IMAGE_EXTENSION = "*.jpg *.JPG"
 
 
