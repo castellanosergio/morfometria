@@ -10,11 +10,17 @@ landmark_names = [
     "LArmPit",
     "LElb",
     "LMCarp",
-    "LFingerHand",
+    "LFingerHand1",
+    "LFingerHand2",
+    "LFingerHand3",
+    "LFingerHand4",
     "RArmPit",
     "RElb",
     "RMCarp",
-    "RFingerHand",
+    "RFingerHand1",
+    "RFingerHand2",
+    "RFingerHand3",
+    "RFingerHand4",
     "LKnee",
     "LTar",
     "LToe",
@@ -41,12 +47,12 @@ landmarks_groups = {
         "angles": [],
     },
     "L_FORELIMB": {
-        "landmarks": ["LArmPit", "LElb", "LMCarp", "LFingerHand"],
-        "angles": [180, 90, 0, 0],
+        "landmarks": ["LArmPit", "LElb", "LMCarp"],
+        "angles": [180, 90, 0],
     },
     "R_FORELIMB": {
-        "landmarks": ["RArmPit", "RElb", "RMCarp", "RFingerHand"],
-        "angles": [0, -90, 0, 0],
+        "landmarks": ["RArmPit", "RElb", "RMCarp"],
+        "angles": [0, -90, 0],
     },
     "L_HINDLIMB": {
         "landmarks": ["VENT", "LKnee", "LTar", "LToe"],
@@ -56,6 +62,38 @@ landmarks_groups = {
         "landmarks": ["VENT", "RKnee", "RTar", "RToe"],
         "angles": [0, 90, -90, -90],
     },
+    "L_HAND1": {
+       "landmarks": ["LMCarp", "LFingerHand1"],
+       "angles": [-90,-90]
+    },
+    "L_HAND2": {
+       "landmarks": ["LMCarp", "LFingerHand2"],
+       "angles": [-60, -60]
+    },
+    "L_HAND3": {
+       "landmarks": ["LMCarp", "LFingerHand3"],
+       "angles": [-30, -30]
+    },
+    "L_HAND4": {
+       "landmarks": ["LMCarp", "LFingerHand4"],
+       "angles": [0, 0]
+    },
+    "R_HAND1": {
+       "landmarks": ["RMCarp", "RFingerHand1"],
+       "angles": [270, 90]
+    },
+    "R_HAND2": {
+       "landmarks": ["RMCarp", "RFingerHand2"],
+       "angles": [240, 60]
+    },
+    "R_HAND3": {
+       "landmarks": ["RMCarp", "RFingerHand3"],
+       "angles": [210, 30]
+    },
+    "R_HAND4": {
+       "landmarks": ["RMCarp", "RFingerHand4"],
+       "angles": [180, 0]
+    }
 }
 
 semilandmarks = {
