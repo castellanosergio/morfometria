@@ -40,8 +40,8 @@ from .plugin_gestione_layers import LayerPlugin
 from . import save_data
 from . import settings_landmarks
 
-__version__ = "0.0.2"
-__version_date__ = "2025-05-26"
+__version__ = "0.0.3"
+__version_date__ = "2025-05-27"
 IMAGE_EXTENSION = "*.jpg *.JPG"
 
 
@@ -52,7 +52,11 @@ class ClickableLabel(QLabel):
         self.setFocusPolicy(Qt.StrongFocus)
 
     def enterEvent(self, event):
-        if self.viewer.inserisci_landmarks.active or self.viewer.spezzata_curva.active or self.viewer.calibrazione.active:
+        if (
+            self.viewer.inserisci_landmarks.active
+            or self.viewer.spezzata_curva.active
+            or self.viewer.calibrazione.active
+        ):
             self.setCursor(Qt.CrossCursor)
             QApplication.setOverrideCursor(Qt.CrossCursor)
         else:
@@ -111,7 +115,9 @@ class ClickableLabel(QLabel):
             self.viewer.end_point = mapped_pos
 
             # Disegna il rettangolo di selezione nel layer
-            p1 = QPoint(int(self.viewer.start_point.x()), int(self.viewer.start_point.y()))
+            p1 = QPoint(
+                int(self.viewer.start_point.x()), int(self.viewer.start_point.y())
+            )
             p2 = QPoint(int(self.viewer.end_point.x()), int(self.viewer.end_point.y()))
             top_left = QPoint(min(p1.x(), p2.x()), min(p1.y(), p2.y()))
             bottom_right = QPoint(max(p1.x(), p2.x()), max(p1.y(), p2.y()))
@@ -123,11 +129,17 @@ class ClickableLabel(QLabel):
         elif not self.viewer.selection_mode and event.buttons() == Qt.LeftButton:
             print(f"{self.viewer.selection_mode=}")
 
-            if self.viewer.inserisci_landmarks.active or self.viewer.spezzata_curva.active:
+            if (
+                self.viewer.inserisci_landmarks.active
+                or self.viewer.spezzata_curva.active
+            ):
                 print("RETURN")
                 return
 
-            if not hasattr(self.viewer, "view_rect") or self.viewer.drag_start_pos is None:
+            if (
+                not hasattr(self.viewer, "view_rect")
+                or self.viewer.drag_start_pos is None
+            ):
                 return
 
             dx = event.position().x() - self.viewer.drag_start_pos.x()
@@ -144,7 +156,9 @@ class ClickableLabel(QLabel):
             new_rect.translate(-int(dx), -int(dy))
 
             # Blocca il rettangolo entro i bordi dell’immagine
-            full_rect = QRect(0, 0, self.viewer.pixmap.width(), self.viewer.pixmap.height())
+            full_rect = QRect(
+                0, 0, self.viewer.pixmap.width(), self.viewer.pixmap.height()
+            )
 
             # Correzione bordo sinistro
             if new_rect.left() < full_rect.left():
@@ -168,7 +182,9 @@ class ClickableLabel(QLabel):
             # Aggiorna immagine visualizzata
             container_size = self.viewer.scroll_area.viewport().size()
             cropped = self.viewer.pixmap.copy(self.viewer.view_rect)
-            scaled = cropped.scaled(container_size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            scaled = cropped.scaled(
+                container_size, Qt.KeepAspectRatio, Qt.SmoothTransformation
+            )
             self.viewer.scaled_pixmap = scaled
             self.setPixmap(scaled)
 
@@ -218,6 +234,8 @@ class ImageViewer(QMainWindow):
         self.setCentralWidget(self.central_widget)
 
         self.debug_mode = False
+        self.__version__ = __version__
+        self.__version_date__ = __version_date__
 
         grid = QGridLayout()
         grid.setSpacing(5)
@@ -296,7 +314,9 @@ class ImageViewer(QMainWindow):
         grid.addWidget(self.zoom_out_button, 8, 6, 1, 1)
 
         self.central_widget.setLayout(grid)
-        self.setWindowTitle(f"Morphometric analysis - v. {__version__} {__version_date__}")
+        self.setWindowTitle(
+            f"Morphometric analysis - v. {__version__} {__version_date__}"
+        )
         self.resize(1000, 700)
 
         self.menu_bar = QMenuBar(self)
@@ -317,7 +337,9 @@ class ImageViewer(QMainWindow):
         file_menu.addAction(open_action)
 
         toggle_layer_action = QAction("Mostra/Nascondi landmarks", self)
-        toggle_layer_action.triggered.connect(lambda: self.layer_manager.toggle_visibility("landmarks"))
+        toggle_layer_action.triggered.connect(
+            lambda: self.layer_manager.toggle_visibility("landmarks")
+        )
         view_menu.addAction(toggle_layer_action)
 
         # Plugin: layer manager e strumenti
@@ -463,9 +485,13 @@ class ImageViewer(QMainWindow):
             self.status_bar.showMessage(f"Image loaded: {self.code} (json file found)")
 
         else:
-            self.status_bar.showMessage(f"Image loaded: {self.code} (no json file found)")
+            self.status_bar.showMessage(
+                f"Image loaded: {self.code} (no json file found)"
+            )
 
-        self.setWindowTitle(f"{pl.Path(file_path).name} - Morphometric analysis - v. {__version__}")
+        self.setWindowTitle(
+            f"{pl.Path(file_path).name} - Morphometric analysis - v. {__version__}"
+        )
 
     def load_json(self, file_path):
         """
@@ -477,7 +503,6 @@ class ImageViewer(QMainWindow):
         self.scale = d["scale"]
         self.scale_unit = d["scale_unit"]
 
-        self.angle_deg = d["angle_deg"]
         self.code = d["code"]
         self.mass_value = d["mass_value"]
         landmarks_json = d["landmarks"]
@@ -497,13 +522,18 @@ class ImageViewer(QMainWindow):
         # rendo possibile aggiungere o eliminare semilandmarks
 
         for key in self.semilandmarks:
-            if self.semilandmarks[key]["landmarks"] == self.semilandmarks_json[key]["landmarks"]:
+            if (
+                self.semilandmarks[key]["landmarks"]
+                == self.semilandmarks_json[key]["landmarks"]
+            ):
                 coord = self.semilandmarks_json[key].get("coordinates", [])
                 self.semilandmarks[key]["coordinates"] = coord
 
                 self.layer_manager.create_layer("semilandmarks")
 
-        self.rotate_angle(self.angle_deg)
+        # rotation
+        self.angle_deg = 0
+        self.rotate_angle(d["angle_deg"])
 
         if self.scale:
             self.scale_label.setText(f"Scala: {self.scale:.4f} {self.scale_unit}/px")
@@ -518,10 +548,14 @@ class ImageViewer(QMainWindow):
         screen_geom = self.screen().availableGeometry()
         if mode == "Auto width":
             target_width = int(screen_geom.width() * 0.7)
-            scaled_pixmap = self.pixmap.scaledToWidth(target_width, Qt.SmoothTransformation)
+            scaled_pixmap = self.pixmap.scaledToWidth(
+                target_width, Qt.SmoothTransformation
+            )
         elif mode == "Auto height":
             target_height = int(screen_geom.height() * 0.6)
-            scaled_pixmap = self.pixmap.scaledToHeight(target_height, Qt.SmoothTransformation)
+            scaled_pixmap = self.pixmap.scaledToHeight(
+                target_height, Qt.SmoothTransformation
+            )
         else:
             scaled_pixmap = self.pixmap
 
@@ -544,22 +578,38 @@ class ImageViewer(QMainWindow):
         return self.landmarks
 
     def rotate_image_dialog(self):
-        angle, ok = QInputDialog.getDouble(self, "Ruota immagine", "Angolo (gradi):", 0.0, -360.0, 360.0, 1)
+        """
+        chiedi l'angolo di trotazione dell'immagine
+        """
+        angle, ok = QInputDialog.getDouble(
+            self, "Ruota immagine", "Angolo (gradi):", 0.0, -360.0, 360.0, 1
+        )
         if ok:
             self.rotate_angle(angle)
 
     def rotate_angle(self, angle):
+        """
+        ruota immagine di un angolo arbitrario
+        """
         transform = QTransform()
         transform.rotate(angle)
 
         rotated_pixmap = self.pixmap.transformed(transform, Qt.SmoothTransformation)
         container_size = self.scroll_area.viewport().size()
-        scaled_rotated = rotated_pixmap.scaled(container_size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        scaled_rotated = rotated_pixmap.scaled(
+            container_size, Qt.KeepAspectRatio, Qt.SmoothTransformation
+        )
         self.scaled_pixmap = scaled_rotated
         self.pixmap = rotated_pixmap  # aggiorna anche l'originale
         self.image.setPixmap(scaled_rotated)
         self.reset_view_rect()
+        if self.angle_deg:
+            self.angle_deg += angle
+        else:
+            self.angle_deg = angle
         self.layer_manager.update_display()
+
+        print(f"{self.angle_deg=}")
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
@@ -588,7 +638,9 @@ class ImageViewer(QMainWindow):
 
         # Mostra la nuova porzione
         cropped = self.pixmap.copy(self.view_rect)
-        scaled = cropped.scaled(container_size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        scaled = cropped.scaled(
+            container_size, Qt.KeepAspectRatio, Qt.SmoothTransformation
+        )
         self.scaled_pixmap = scaled
 
         self.image.setPixmap(scaled)
@@ -600,7 +652,9 @@ class ImageViewer(QMainWindow):
         x1, y1 = self.start_point.x(), self.start_point.y()
         x2, y2 = self.end_point.x(), self.end_point.y()
 
-        sel_rect_original = QRect(int(min(x1, x2)), int(min(y1, y2)), int(abs(x2 - x1)), int(abs(y2 - y1)))
+        sel_rect_original = QRect(
+            int(min(x1, x2)), int(min(y1, y2)), int(abs(x2 - x1)), int(abs(y2 - y1))
+        )
 
         # Intersezione con i limiti dell'immagine originale
         full_rect = QRect(0, 0, self.pixmap.width(), self.pixmap.height())
@@ -614,7 +668,9 @@ class ImageViewer(QMainWindow):
             print("Nessuna immagine caricata, impossibile zoommare")
             return
 
-        print(f"[zoom_plus] chiamato con factor = {factor}, scale_factor = {self.scale_factor}")
+        print(
+            f"[zoom_plus] chiamato con factor = {factor}, scale_factor = {self.scale_factor}"
+        )
 
         # Scrollbar e viewport
         h_bar = self.scroll_area.horizontalScrollBar()
@@ -668,7 +724,9 @@ class ImageViewer(QMainWindow):
             self.view_rect = QRect(0, 0, self.pixmap.width(), self.pixmap.height())
             container_size = self.scroll_area.viewport().size()
             cropped = self.pixmap.copy(self.view_rect)
-            scaled = cropped.scaled(container_size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            scaled = cropped.scaled(
+                container_size, Qt.KeepAspectRatio, Qt.SmoothTransformation
+            )
             self.scaled_pixmap = scaled
             self.image.setPixmap(scaled)
             self.disattiva_zoom()
@@ -763,6 +821,9 @@ class ImageViewer(QMainWindow):
 def run():
     app = QApplication(sys.argv)
     viewer = ImageViewer()
+    # if len(sys.argv) > 1:
+    #    viewer
+
     sys.exit(app.exec())
 
 

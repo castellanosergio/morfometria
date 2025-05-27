@@ -53,7 +53,10 @@ class ImageAligner:
         # Allineamento con asse Y verso l'alto
         angle_rad = math.atan2(-dx, -dy)
         angle_deg = math.degrees(angle_rad)
-        self.viewer.angle_deg = angle_deg
+        if self.viewer.angle_deg:
+            self.viewer.angle_deg += angle_deg
+        else:
+            self.viewer.angle_deg = angle_deg
         transform = QTransform()
         transform.translate(-p1.x(), -p1.y())
         transform.rotate(angle_deg)
