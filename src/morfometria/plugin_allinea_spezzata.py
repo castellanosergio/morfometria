@@ -1,7 +1,8 @@
 from PySide6.QtCore import QPointF, Qt
-from PySide6.QtWidgets import QMessageBox, QInputDialog
+from PySide6.QtWidgets import QMessageBox
 from PySide6.QtGui import QColor
 import math
+
 
 class SpezzataAligner:
     def __init__(self, viewer):
@@ -9,7 +10,6 @@ class SpezzataAligner:
         self.points = []
         self.active = False
         self.show_all_points = True
-        
 
     def start(self):
         self.points = []
@@ -19,7 +19,7 @@ class SpezzataAligner:
         self.viewer.selection_mode = False
         if self.viewer.inserisci_landmarks.active:
             self.viewer.inserisci_landmarks.deactivate()
-    
+
     def handle_click(self, pos: QPointF):
         self.points.append(pos)
         self.draw_preview()
@@ -32,11 +32,13 @@ class SpezzataAligner:
 
         # Chiedi se mostrare tutti i punti o solo primo/ultimo
         scelta = QMessageBox.question(
-            self.viewer, "Mostra punti",
+            self.viewer,
+            "Mostra punti",
             "Vuoi visualizzare tutti i punti della spezzata?",
-            QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.Yes,
         )
-        self.show_all_points = (scelta == QMessageBox.Yes)
+        self.show_all_points = scelta == QMessageBox.Yes
 
         if not self.show_all_points and len(aligned) > 2:
             aligned = [aligned[0], aligned[-1]]
@@ -47,21 +49,17 @@ class SpezzataAligner:
 
         # Disegna su layer
         self.draw_on_layer()
-        
 
     def straighten_polyline(self, points):
         if len(points) < 2:
             return points[:]
-        
+
         dx = self.points[1].x() - self.points[0].x()
         dy = self.points[1].y() - self.points[0].y()
         angolo_con_asse = math.atan2(dy, dx)
         direction_angle = self.determina_direzione_allineamento(angolo_con_asse)
-        
-        distances = [
-            math.hypot(points[i+1].x() - points[i].x(), points[i+1].y() - points[i].y())
-            for i in range(len(points)-1)
-        ]
+
+        distances = [math.hypot(points[i + 1].x() - points[i].x(), points[i + 1].y() - points[i].y()) for i in range(len(points) - 1)]
 
         dx = math.cos(direction_angle)
         dy = math.sin(direction_angle)
@@ -82,7 +80,7 @@ class SpezzataAligner:
         self.viewer.layer_manager.draw_points("spezzata", self.points, color=QColor(255, 255, 255, 150))
 
     def draw_on_layer(self):
-        """Disegna la spezzata finale su un layer """
+        """Disegna la spezzata finale su un layer"""
         if len(self.points) < 2:
             return
         self.viewer.layer_manager.clear_layer("spezzata")
@@ -99,9 +97,8 @@ class SpezzataAligner:
         if -45 <= angolo_gradi < 45 or angolo_normalizzato < 45 or angolo_normalizzato >= 315:
             return 0  # Orizzontale (est)
         elif 45 <= angolo_normalizzato < 135:
-            return math.pi/2  # Verticale (nord)
+            return math.pi / 2  # Verticale (nord)
         elif 135 <= angolo_normalizzato < 225:
             return math.pi  # Orizzontale opposta (ovest)
         elif 225 <= angolo_normalizzato < 315:
-            return -math.pi/2  # Verticale opposta (sud)
-        
+            return -math.pi / 2  # Verticale opposta (sud)
